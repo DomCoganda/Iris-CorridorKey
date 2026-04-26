@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Build
+        run: cargo build --release --target x86_64-pc-windows-msvc
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-windows
+          path: target/x86_64-pc-windows-msvc/release/iris-corridorkey.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Vendor dependencies
+        run: |
+          cargo vendor vendor
+          mkdir -p .cargo
+          cat >> .cargo/config.toml << 'EOF'
+          [source.crates-io]
+          replace-with = "vendored-sources"
+          [source.vendored-sources]
+          directory = "vendor"
+          EOF
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+          flatpak install --user -y flathub org.freedesktop.Sdk.Extension.rust-stable//24.08
+      - name: Build Flatpak
+        run: flatpak-builder --user --install --force-clean build-dir org.seraph.Iris.json
+      - name: Export Flatpak bundle
+        run: flatpak build-bundle ~/.local/share/flatpak/repo iris-corridorkey-linux.flatpak org.seraph.Iris
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-linux
+          path: iris-corridorkey-linux.flatpak
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Build
+        run: cargo build --release --target aarch64-apple-darwin
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-macos
+          path: target/aarch64-apple-darwin/release/iris-corridorkey
