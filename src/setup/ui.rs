@@ -1,7 +1,6 @@
 use std::sync::{Arc, Mutex};
 use kairos::*;
 use kairos::column;
-use kairos::FileSource::Embedded;
 use kairos::row;
 use super::{SetupStep, StepState};
 use crate::Page;

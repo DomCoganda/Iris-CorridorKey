@@ -1,5 +1,4 @@
 use kairos::*;
-use kairos::FileSource::Embedded;
 use kairos::row;
 
 #[component]

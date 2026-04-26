@@ -1,10 +1,6 @@
-// ======================
-// src\main.rs
-// ======================
-
+#![windows_subsystem = "windows"]
 use std::sync::{Arc, Mutex};
 use kairos::*;
-use kairos::column;
 
 mod setup;
 #[macro_use]

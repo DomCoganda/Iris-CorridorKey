@@ -226,7 +226,7 @@ impl Component for QueuePanel {
                                     let name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
                                     let stem = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
                                     let work_dir = crate::setup::paths::work_dir_for(&stem).to_string_lossy().to_string();
-                                    let original_path = path.to_string_lossy().to_string();
+                                    let _original_path = path.to_string_lossy().to_string();
 
                                     std::fs::create_dir_all(&work_dir).ok();
 

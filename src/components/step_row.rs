@@ -16,7 +16,7 @@ pub struct SetupStepRow {
 }
 
 impl Component for SetupStepRow {
-    fn build(&self, palette: &Palette) -> Widget {
+    fn build(&self, _palette: &Palette) -> Widget {
         let state_widget: Widget = match self.state {
             StepState::Active => spinner![
                 shape: SpinnerShape::Arc,

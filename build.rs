@@ -1,7 +1,7 @@
 fn main() {
+    bezalel::build();
+
     let out = std::env::var("OUT_DIR").unwrap();
-    // OUT_DIR is deep inside target/debug/build/iris-xxx/out
-    // going up 3 ancestors gives us target/debug/
     let target_dir = std::path::Path::new(&out)
         .ancestors()
         .nth(3)
