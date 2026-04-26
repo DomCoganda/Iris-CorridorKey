@@ -1,8 +1,8 @@
 [package]
-name = "Iris-CorridorKey"
+name = "iris-corridorkey"
 version = "0.1.0"
 edition = "2021"
-description = "Iris CorridorKey"
+description = "Iris - CorridorKey"
 
 [dependencies]
 kairos = { package = "kairos-ui", version = "0.1.0" }
