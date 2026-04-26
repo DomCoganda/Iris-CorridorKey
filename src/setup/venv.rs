@@ -28,16 +28,18 @@ fn venv_python() -> std::path::PathBuf {
 fn detect_gpu_vendor() -> &'static str {
     #[cfg(target_os = "windows")]
     {
-        let result = Command::new("powershell")
-            .args([
-                "-NoProfile", "-Command",
-                "(Get-CimInstance Win32_VideoController | \
-                  Where-Object { $_.Caption -notmatch 'Microsoft|VMware|VirtualBox|Parsec' } | \
-                  Select-Object -First 1 -ExpandProperty Caption)",
-            ])
-            .output();
-
-        if let Ok(out) = result {
+        let mut cmd = Command::new("powershell");
+        cmd.args([
+            "-NoProfile", "-Command",
+            "(Get-CimInstance Win32_VideoController | \
+              Where-Object { $_.Caption -notmatch 'Microsoft|VMware|VirtualBox|Parsec' } | \
+              Select-Object -First 1 -ExpandProperty Caption)",
+        ]);
+        {
+            use std::os::windows::process::CommandExt;
+            cmd.creation_flags(0x08000000);
+        }
+        if let Ok(out) = cmd.output() {
             let name = String::from_utf8_lossy(&out.stdout).to_lowercase();
             if name.contains("nvidia") || name.contains("geforce") || name.contains("quadro") {
                 return "nvidia";
@@ -53,7 +55,8 @@ fn detect_gpu_vendor() -> &'static str {
 
     #[cfg(target_os = "linux")]
     {
-        if Command::new("nvidia-smi").output().map(|o| o.status.success()).unwrap_or(false) {
+        let mut cmd = Command::new("nvidia-smi");
+        if cmd.output().map(|o| o.status.success()).unwrap_or(false) {
             return "nvidia";
         }
         if let Ok(out) = Command::new("lspci").output() {
@@ -67,21 +70,30 @@ fn detect_gpu_vendor() -> &'static str {
 }
 
 fn cuda_available() -> bool {
-    Command::new(venv_python())
-        .args(["-c", "import torch; print(torch.cuda.is_available())"])
-        .output()
+    let mut cmd = Command::new(venv_python());
+    cmd.args(["-c", "import torch; print(torch.cuda.is_available())"]);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+    cmd.output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim() == "True")
         .unwrap_or(false)
 }
 
 fn directml_available() -> bool {
-    Command::new(venv_python())
-        .args(["-c", "import torch_directml"])
-        .output()
+    let mut cmd = Command::new(venv_python());
+    cmd.args(["-c", "import torch_directml"]);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+    cmd.output()
         .map(|o| o.status.success())
         .unwrap_or(false)
 }
-
 /// Run a pip install command and stream download progress back through `report`.
 /// Parses pip's progress lines which look like:
 ///   Downloading torch-2.4.0-...-win_amd64.whl (2.6 GB)

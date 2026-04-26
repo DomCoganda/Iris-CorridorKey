@@ -123,11 +123,14 @@ pub fn venv_python() -> PathBuf {
 }
 
 pub fn ffmpeg_exe() -> Option<PathBuf> {
-    let output = std::process::Command::new(venv_python())
-        .args(["-c", "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"])
-        .output()
-        .ok()?;
-
+    let mut cmd = std::process::Command::new(venv_python());
+    cmd.args(["-c", "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"]);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+    let output = cmd.output().ok()?;
     if output.status.success() {
         let path = String::from_utf8(output.stdout).ok()?;
         Some(PathBuf::from(path.trim()))

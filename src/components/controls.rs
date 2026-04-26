@@ -42,7 +42,7 @@ impl ControlsPanel {
         footer_status: Signal<String>,
         footer_progress: Signal<f32>,
     ) -> Self {
-        let method_options: Vec<String> = std::fs::read_dir(crate::setup::paths::alpha_models_dir())
+        let installed: Vec<String> = std::fs::read_dir(crate::setup::paths::alpha_models_dir())
             .map(|entries| {
                 entries
                     .filter_map(|e| e.ok())
@@ -67,8 +67,13 @@ impl ControlsPanel {
             })
             .unwrap_or_default();
 
-        let method = if method_options.is_empty() {
-            Signal::new(None)
+        let method_options: Vec<String> = AVAILABLE_ALPHA_MODELS
+            .iter()
+            .map(|(name, _)| name.to_string())
+            .collect();
+
+        let method = if !installed.is_empty() {
+            Signal::new(Some(installed[0].clone()))
         } else {
             Signal::new(Some(method_options[0].clone()))
         };

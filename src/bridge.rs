@@ -110,16 +110,23 @@ fn spawn_bridge(
         println!("[iris bridge spawn] script={}", bridge_script.to_string_lossy());
         println!("[iris bridge spawn] args={:?}", args);
 
-        let mut child = match std::process::Command::new(&python)
+        let mut command = std::process::Command::new(&python);
+        command
             .arg(&bridge_script)
             .args(&args)
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
             .env("TRANSFORMERS_OFFLINE", "1")
             .env("HF_HUB_OFFLINE", "1")
-            .env("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-            .spawn()
+            .env("HF_HUB_DISABLE_SYMLINKS_WARNING", "1");
+
+        #[cfg(windows)]
         {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x08000000);
+        }
+
+        let mut child = match command.spawn() {
             Ok(c) => { println!("[iris bridge spawn] process spawned"); c }
             Err(e) => {
                 println!("[iris bridge spawn] failed: {}", e);
@@ -180,7 +187,7 @@ fn spawn_bridge(
 }
 
 // ---------------------------------------------------------------------------
-// PreviewServer — persistent process that keeps CK loaded between previews
+// PreviewServer
 // ---------------------------------------------------------------------------
 
 pub struct PreviewServer {
@@ -189,9 +196,6 @@ pub struct PreviewServer {
 }
 
 impl PreviewServer {
-    /// Spawn the preview_server process. Calls `on_ready` when the server
-    /// has loaded the model and is ready for commands. Calls `on_event` for
-    /// every subsequent event (Done, Error, Status).
     pub fn start(
         work_dir: String,
         alpha_model: String,
@@ -207,7 +211,8 @@ impl PreviewServer {
 
         println!("[iris preview server] starting");
 
-        let mut child = std::process::Command::new(&python)
+        let mut command = std::process::Command::new(&python);
+        command
             .arg(&bridge_script)
             .args(&[
                 "--action",       "preview_server",
@@ -221,15 +226,21 @@ impl PreviewServer {
             .stderr(std::process::Stdio::piped())
             .env("TRANSFORMERS_OFFLINE", "1")
             .env("HF_HUB_OFFLINE", "1")
-            .env("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-            .spawn()
+            .env("HF_HUB_DISABLE_SYMLINKS_WARNING", "1");
+
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x08000000);
+        }
+
+        let mut child = command.spawn()
             .expect("failed to spawn preview server");
 
         let stdin  = Arc::new(Mutex::new(child.stdin.take().unwrap()));
         let stdout = child.stdout.take().unwrap();
         let stderr = child.stderr.take().unwrap();
 
-        // stderr reader
         std::thread::spawn(move || {
             let mut reader = BufReader::new(stderr);
             let mut buf = Vec::new();
@@ -249,7 +260,6 @@ impl PreviewServer {
             }
         });
 
-        // stdout reader — forwards all events to the callback
         let on_event = Arc::new(on_event);
         std::thread::spawn(move || {
             let reader = BufReader::new(stdout);
@@ -265,8 +275,6 @@ impl PreviewServer {
         PreviewServer { stdin, _child: child }
     }
 
-    /// Send a preview request for the given frame with the given parameters.
-    /// Returns immediately — the result arrives via the on_event callback as Done.
     pub fn request(&self, frame: u32, params: &InferParams) {
         let cmd = format!(
             "{{\"frame\":{},\"despill\":{},\"refiner\":{},\"despeckle\":{}}}\n",
