@@ -13,4 +13,4 @@ serde_json = "1"
 zip = "0.6"
 
 [build-dependencies]
-bezalel = { path = "../../Lib/bezalel" }
+bezalel = "0.1.0"
