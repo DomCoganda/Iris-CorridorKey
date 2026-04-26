@@ -1,0 +1,39 @@
+{
+      "app-id": "org.seraph.Iris",
+      "runtime": "org.freedesktop.Platform",
+      "runtime-version": "24.08",
+      "sdk": "org.freedesktop.Sdk",
+      "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
+      "command": "iris",
+      "finish-args": [
+        "--share=ipc",
+        "--socket=wayland",
+        "--socket=fallback-x11",
+        "--device=dri",
+        "--filesystem=home"
+      ],
+      "build-options": {
+        "append-path": "/usr/lib/sdk/rust-stable/bin",
+        "env": {
+          "CARGO_HOME": "/run/build/iris/cargo",
+          "RUSTUP_TOOLCHAIN": "stable"
+        }
+      },
+      "modules": [
+        {
+          "name": "iris",
+          "buildsystem": "simple",
+          "build-commands": [
+            "mkdir -p .cargo && printf '[source.crates-io]\\nreplace-with = \"vendored-sources\"\\n[source.vendored-sources]\\ndirectory = \"vendor\"\\n' > .cargo/config.toml",
+            "cargo build --release",
+            "install -Dm755 target/release/iris /app/bin/iris"
+          ],
+          "sources": [
+            {
+              "type": "dir",
+              "path": "."
+            }
+          ]
+        }
+      ]
+    }
