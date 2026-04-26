@@ -1,0 +1,13 @@
+[package]
+name = "iris"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+kairos = { path = "../../Lib/kairos" }
+reqwest = { version = "0.12", features = ["blocking", "stream", "native-tls"] }
+flate2 = "1"
+tar = "0.4"
+rfd = "0.15"
+serde_json = "1"
+zip = "0.6"

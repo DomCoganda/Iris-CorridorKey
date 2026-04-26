@@ -1,0 +1,23 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="64" height="64" />
+    <g transform="translate(6 14)">
+        <path d="M2 18 C10 4, 20 1, 26 1 C32 1, 42 4, 50 18" stroke="#FF5F1F" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M2 18 C10 32, 20 35, 26 35 C32 35, 42 32, 50 18" stroke="#FF5F1F" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+        <!--Corridor Digital Logo -->
+        <g transform="translate(26 18)">
+            <!--Outer Broken Square -->
+            <g>
+                <path d="M-1 -11 L-11 -1 L-8 -1 L-1 -8 Z" fill="#FFF207"/>
+                <path d="M1 -11 L11 -1 L8 -1 L1 -8 Z" fill="#FFF207"/>
+                <path d="M1 11 L11 1 L8 1 L1 8 Z" fill="#FFF207"/>
+            </g>
+            <!--Outer Broken Square -->
+            <g transform="scale(0.55)">
+                <path d="M-1 -11 L-11 -1 L-5 -1 L-1 -5 Z" fill="#FFF207"/>
+                <path d="M1 11 L11 1 L5 1 L1 5 Z" fill="#FFF207"/>
+                <path d="M-1 11 L-11 1 L-5 1 L-1 5 Z" fill="#FFF207"/>
+            </g>
+        </g>
+    </g>
+</svg>
