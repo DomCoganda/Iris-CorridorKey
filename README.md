@@ -34,13 +34,14 @@ Iris handles everything CorridorKey needs behind the scenes:
 
 ## Hardware Requirements
 
-Iris itself is lightweight. The GPU requirements come from CorridorKey's inference engine:
+Iris itself is lightweight. The GPU load comes from CorridorKey's inference engine, and it scales with the **Parallel Processing** setting — fewer parallel frames means less VRAM used per run.
 
-- **CorridorKey** — approximately **22.7 GB VRAM** at native 2048×2048. A 24 GB card (RTX 3090, 4090, 5090, etc.) is the minimum.
-- **GVM / VideoMaMa / MatAnyone2** — optional alpha hint generators with higher VRAM demands. See the [CorridorKey repo](https://github.com/nikopueringer/CorridorKey) for details.
+- **Minimum** — 6 GB VRAM with parallel set to 2 (tested on an RTX 4050 laptop)
+- **Native 2048×2048 at full throughput** — approximately 22.7 GB VRAM, so a 24 GB card (RTX 3090, 4090, 5090) is recommended for unconstrained runs
+
+Optional alpha hint generators (GVM, VideoMaMa, MatAnyone2) have additional VRAM demands. See the [CorridorKey repo](https://github.com/nikopueringer/CorridorKey) for details.
 
 NVIDIA GPUs with CUDA 12.6+ are recommended on Windows. CUDA, MPS (Apple Silicon), and CPU fallback are all supported.
-
 ---
 
 ## Getting Started
